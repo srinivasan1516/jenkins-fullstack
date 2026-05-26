@@ -2,11 +2,6 @@ pipeline {
 
     agent any
 
-    environment {
-        FRONTEND_DIR = "frontend"
-        BACKEND_DIR = "backend"
-    }
-
     stages {
 
         stage('Clone Code') {
@@ -16,40 +11,25 @@ pipeline {
             }
         }
 
-        stage('Frontend Install') {
+        stage('Install Dependencies') {
             steps {
-                dir("${FRONTEND_DIR}") {
-                    sh 'npm install'
-                }
+                sh 'npm install'
             }
         }
 
-        stage('Frontend Build') {
+        stage('Build') {
             steps {
-                dir("${FRONTEND_DIR}") {
-                    sh 'npm run build'
-                }
+                sh 'npm run build'
             }
         }
 
-        stage('Backend Install') {
+        stage('Start Application') {
             steps {
-                dir("${BACKEND_DIR}") {
-                    sh 'npm install'
-                }
+                sh '''
+                pm2 delete app || true
+                pm2 start npm --name app -- start
+                '''
             }
         }
-
-        stage('Start Backend') {
-            steps {
-                dir("${BACKEND_DIR}") {
-                    sh '''
-                    pm2 delete backend || true
-                    pm2 start server.js --name backend
-                    '''
-                }
-            }
-        }
-
     }
 }
