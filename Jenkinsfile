@@ -2,10 +2,6 @@ pipeline {
 
     agent any
 
-    tools {
-        nodejs "node18"
-    }
-
     environment {
         FRONTEND_DIR = "frontend"
         BACKEND_DIR = "backend"
@@ -20,7 +16,7 @@ pipeline {
             }
         }
 
-        stage('Install Frontend Dependencies') {
+        stage('Frontend Install') {
             steps {
                 dir("${FRONTEND_DIR}") {
                     sh 'npm install'
@@ -28,7 +24,7 @@ pipeline {
             }
         }
 
-        stage('Build Frontend') {
+        stage('Frontend Build') {
             steps {
                 dir("${FRONTEND_DIR}") {
                     sh 'npm run build'
@@ -36,16 +32,7 @@ pipeline {
             }
         }
 
-        stage('Deploy Frontend') {
-            steps {
-                sh '''
-                sudo rm -rf /var/www/html/*
-                sudo cp -r frontend/build/* /var/www/html/
-                '''
-            }
-        }
-
-        stage('Install Backend Dependencies') {
+        stage('Backend Install') {
             steps {
                 dir("${BACKEND_DIR}") {
                     sh 'npm install'
@@ -57,14 +44,12 @@ pipeline {
             steps {
                 dir("${BACKEND_DIR}") {
                     sh '''
-                    pm2 delete backend-app || true
-                    pm2 start server.js --name backend-app
-                    pm2 save
+                    pm2 delete backend || true
+                    pm2 start server.js --name backend
                     '''
                 }
             }
         }
 
     }
-
 }
